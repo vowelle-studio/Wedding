@@ -11,8 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" href="assets/envelope.png" as="image" fetchpriority="high" />
-  <link rel="preload" href="assets/envelop.mp4" as="video" type="video/mp4" />
-  <link rel="preload" href="Video.mp4" as="video" type="video/mp4" />
+  <link rel="preload" href="assets/envelop.mp4" as="video" type="video/mp4" fetchpriority="high" />
   <link rel="preload" href="divider/divider_12.png" as="image" />
   <link rel="preload" href="divider/divider_heart.png" as="image" />
   <link rel="preload" href="pare.png" as="image" />
@@ -1143,9 +1142,9 @@
     }
     .studio-credit__logo {
       display: block;
-      width: clamp(212px, 64vw, 380px);
+      width: min(760px, 92vw);
       height: auto;
-      max-height: clamp(32px, 8.75vw, 46px);
+      max-height: min(92px, 17.5vw);
       object-fit: contain;
       object-position: center;
     }
@@ -1246,7 +1245,7 @@
     <video id="envelope-video" class="video-layer video-layer--first" muted playsinline preload="auto">
       <source src="assets/envelop.mp4" type="video/mp4" />
     </video>
-    <video id="intro-video" class="video-layer video-layer--second" muted playsinline webkit-playsinline preload="auto">
+    <video id="intro-video" class="video-layer video-layer--second" muted playsinline webkit-playsinline preload="none">
       <source src="Video.mp4" type="video/mp4" />
     </video>
     <div id="video-flash-white" class="video-flash-white" aria-hidden="true"></div>
@@ -1261,7 +1260,7 @@
 
     <!-- Hero -->
     <section class="hero fade-up">
-      <video id="hero-bg-video" class="hero-bg-video" muted playsinline webkit-playsinline preload="auto" aria-hidden="true">
+      <video id="hero-bg-video" class="hero-bg-video" muted playsinline webkit-playsinline preload="none" aria-hidden="true">
         <source src="Video.mp4" type="video/mp4" />
       </video>
       <div id="hero-intro-veil" class="hero-intro-veil" aria-hidden="true"></div>
@@ -1445,8 +1444,8 @@
           class="studio-credit__logo"
           src="assets/vowelle-studio.png"
           alt="Vowelle Studio"
-          width="380"
-          height="46"
+          width="760"
+          height="92"
           decoding="async"
           loading="lazy"
         />
@@ -1529,7 +1528,8 @@
       document.body.style.overflow = 'hidden';
     })();
 
-    const INTRO_MEDIA_TIMEOUT_MS = 14000;
+    const INTRO_ENVELOPE_TIMEOUT_MS = 9000;
+    const INTRO_VIDEO_TIMEOUT_MS = 18000;
 
     function preloadImageAsset(src) {
       return new Promise((resolve) => {
@@ -1542,13 +1542,35 @@
       });
     }
 
-    function waitVideoReady(video) {
+    function setVideoPreload(video, mode) {
+      if (!video) return;
+      video.preload = mode;
+    }
+
+    function startVideoLoad(video) {
+      if (!video) return;
+      setVideoPreload(video, 'auto');
+      try {
+        video.load();
+      } catch (e) {}
+    }
+
+  /**
+   * @param {HTMLVideoElement | null} video
+   * @param {{ minReadyState?: number, timeoutMs?: number, autoLoad?: boolean }} [opts]
+   */
+    function waitVideoReady(video, opts) {
+      const options = opts || {};
+      const minReadyState = options.minReadyState ?? 3;
+      const timeoutMs = options.timeoutMs ?? INTRO_VIDEO_TIMEOUT_MS;
+      const autoLoad = options.autoLoad !== false;
+
       return new Promise((resolve) => {
         if (!video) {
           resolve();
           return;
         }
-        if (video.readyState >= 3) {
+        if (video.readyState >= minReadyState) {
           resolve();
           return;
         }
@@ -1566,13 +1588,24 @@
         video.addEventListener('canplay', finish, { once: true });
         video.addEventListener('loadeddata', finish, { once: true });
         video.addEventListener('error', finish, { once: true });
-        try {
-          video.load();
-        } catch (e) {
-          finish();
-          return;
-        }
-        setTimeout(finish, INTRO_MEDIA_TIMEOUT_MS);
+        if (autoLoad) startVideoLoad(video);
+        setTimeout(finish, timeoutMs);
+      });
+    }
+
+    async function loadRemainingIntroVideos(v2, heroV) {
+      startVideoLoad(v2);
+      await waitVideoReady(v2, {
+        minReadyState: 3,
+        timeoutMs: INTRO_VIDEO_TIMEOUT_MS,
+        autoLoad: false,
+      });
+
+      startVideoLoad(heroV);
+      await waitVideoReady(heroV, {
+        minReadyState: 3,
+        timeoutMs: INTRO_VIDEO_TIMEOUT_MS,
+        autoLoad: false,
       });
     }
 
@@ -1599,14 +1632,6 @@
       const v2 = document.getElementById('intro-video');
       const heroV = document.getElementById('hero-bg-video');
 
-      [v1, v2, heroV].forEach((video) => {
-        if (!video) return;
-        video.preload = 'auto';
-        try {
-          video.load();
-        } catch (e) {}
-      });
-
       const poster = document.getElementById('envelope-poster');
       const posterReady =
         poster && poster.complete && poster.naturalWidth > 0
@@ -1621,7 +1646,7 @@
               poster.addEventListener('error', done, { once: true });
             });
 
-      const criticalImages = [
+      const deferredImages = [
         'divider/divider_12.png',
         'divider/divider_heart.png',
         'divider/divider_16-Photoroom.png',
@@ -1631,24 +1656,49 @@
         'assets/calendar-heart.svg',
       ];
 
-      const mediaReady = Promise.all([
-        posterReady,
-        waitVideoReady(v1),
-        waitVideoReady(v2),
-        waitVideoReady(heroV),
-        preloadWebFonts(),
-        ...criticalImages.map(preloadImageAsset),
-      ]);
-
-      window.__introMediaReady = Promise.race([
-        mediaReady,
-        new Promise((resolve) => setTimeout(resolve, INTRO_MEDIA_TIMEOUT_MS)),
-      ]).then(() => {
+      function markEnvelopeReady() {
         document.documentElement.classList.add('intro-media-ready');
-      });
+      }
 
-      window.__introMediaReady.catch(() => {
-        document.documentElement.classList.add('intro-media-ready');
+      /** Конверт можна відкривати, щойно готові постер + перше відео */
+      const envelopeReady = Promise.race([
+        Promise.all([
+          posterReady,
+          waitVideoReady(v1, {
+            minReadyState: 3,
+            timeoutMs: INTRO_ENVELOPE_TIMEOUT_MS,
+          }),
+          preloadWebFonts(),
+        ]),
+        new Promise((resolve) => setTimeout(resolve, INTRO_ENVELOPE_TIMEOUT_MS)),
+      ]).then(markEnvelopeReady);
+
+      window.__introMediaReady = envelopeReady;
+      envelopeReady.catch(markEnvelopeReady);
+
+      /** Друге відео та hero — у фоні, по черзі, після першого */
+      window.__introVideosFullReady = envelopeReady
+        .then(() => loadRemainingIntroVideos(v2, heroV))
+        .then(() => {
+          document.documentElement.classList.add('intro-videos-full-ready');
+        })
+        .catch(() => {
+          document.documentElement.classList.add('intro-videos-full-ready');
+        });
+
+      envelopeReady.then(() => {
+        deferredImages.forEach((src) => {
+          void preloadImageAsset(src);
+        });
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(() => {
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.as = 'video';
+            link.href = 'Video.mp4';
+            document.head.appendChild(link);
+          });
+        }
       });
     })();
 
