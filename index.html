@@ -105,20 +105,20 @@
       display: block;
       transition: opacity 0.35s ease;
     }
-    html:not(.intro-envelope-video-ready) #envelope-overlay::before {
-      content: 'Завантаження…';
+    html:not(.intro-envelope-video-ready) #envelope-overlay::after {
+      content: '';
       position: absolute;
-      bottom: max(3.5rem, calc(env(safe-area-inset-bottom) + 2rem));
+      bottom: max(1.25rem, env(safe-area-inset-bottom));
       left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: clamp(0.85rem, 3.2vw, 1rem);
-      letter-spacing: 0.12em;
-      color: rgba(255, 252, 248, 0.88);
-      text-shadow: 0 1px 8px rgba(47, 38, 34, 0.35);
+      width: 2rem;
+      height: 2rem;
+      margin-left: -1rem;
+      border: 2px solid rgba(255, 252, 248, 0.35);
+      border-top-color: rgba(255, 252, 248, 0.92);
+      border-radius: 50%;
+      animation: envelopeSpinner 0.75s linear infinite;
       pointer-events: none;
+      z-index: 2;
     }
     html:not(.intro-envelope-video-ready) #envelope-poster {
       animation: envelopePreparePulse 1.6s ease-in-out infinite;
@@ -533,32 +533,23 @@
       animation: revealCountdownSection 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
-    .fade-up [data-reveal-stagger] {
+    [data-reveal-stagger],
+    .reveal-scroll-item {
       opacity: 0;
-      transform: translateY(20px) scale(0.98);
+      transform: translateY(24px);
+      will-change: opacity, transform;
     }
-    .fade-up.visible [data-reveal-stagger].reveal-stagger-visible {
-      animation: revealStaggerItem 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-      animation-delay: calc(0.18s + var(--reveal-i, 0) * 0.13s);
+    [data-reveal-stagger].reveal-scroll-visible {
+      animation: revealStaggerItem 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
-
-    .timeline-section.fade-up:not(.visible) .timeline-item {
-      opacity: 0;
+    .timeline-item.reveal-scroll-item.reveal-scroll-visible {
+      animation: revealSlideLeft 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
-    .timeline-section.fade-up.visible .timeline-item {
-      animation: revealSlideLeft 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-    .timeline-section.fade-up.visible .timeline-item:nth-child(even) {
+    .timeline-item.reveal-scroll-item:nth-child(even).reveal-scroll-visible {
       animation-name: revealSlideRight;
     }
-    .timeline-section.fade-up.visible .timeline-item:nth-child(1) {
-      animation-delay: 0.22s;
-    }
-    .timeline-section.fade-up.visible .timeline-item:nth-child(2) {
-      animation-delay: 0.38s;
-    }
-    .timeline-section.fade-up.visible .timeline-item:nth-child(3) {
-      animation-delay: 0.54s;
+    .timeline-section .section-title.reveal-scroll-item.reveal-scroll-visible {
+      animation: revealRise 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
     .reveal-on-scroll {
@@ -709,8 +700,9 @@
       }
       .fade-up,
       .fade-up.visible,
-      .fade-up [data-reveal-stagger],
-      .timeline-section.fade-up.visible .timeline-item,
+      [data-reveal-stagger],
+      .reveal-scroll-item,
+      .reveal-scroll-visible,
       .reveal-on-scroll,
       .reveal-on-scroll.visible {
         animation: none !important;
@@ -1175,9 +1167,8 @@
         rgba(243, 232, 218, 1) 100%
       );
     }
-    .countdown-section.fade-up.visible .countdown-card[data-reveal-stagger].reveal-stagger-visible {
+    .countdown-card[data-reveal-stagger].reveal-scroll-visible {
       animation: revealCountdownPop 0.85s cubic-bezier(0.34, 1.35, 0.48, 1) forwards;
-      animation-delay: calc(0.25s + var(--reveal-i, 0) * 0.1s);
     }
     .countdown-section .section-title {
       position: relative;
@@ -1533,10 +1524,10 @@
     </section>
 
     <!-- Timeline -->
-    <section class="timeline-section fade-up" data-reveal="drift">
-      <h2 class="section-title">Таймінг дня</h2>
+    <section class="timeline-section">
+      <h2 class="section-title reveal-scroll-item">Таймінг дня</h2>
       <div class="timeline">
-        <div class="timeline-item">
+        <div class="timeline-item reveal-scroll-item">
           <div class="timeline-time">13:00</div>
           <div class="timeline-dot"></div>
           <div class="timeline-info">
@@ -1544,7 +1535,7 @@
             <div class="location">Покровський собор</div>
           </div>
         </div>
-        <div class="timeline-item">
+        <div class="timeline-item reveal-scroll-item">
           <div class="timeline-time">14:00</div>
           <div class="timeline-dot"></div>
           <div class="timeline-info">
@@ -1552,7 +1543,7 @@
             <div class="location">Ресторан «Айвенго»</div>
           </div>
         </div>
-        <div class="timeline-item">
+        <div class="timeline-item reveal-scroll-item">
           <div class="timeline-time">14:30</div>
           <div class="timeline-dot"></div>
           <div class="timeline-info">
@@ -1976,23 +1967,29 @@
         document.documentElement.classList.add('intro-media-ready');
       }
 
-      setVideoPreload(v2, 'none');
-      setVideoPreload(heroV, 'none');
-      startVideoLoad(v1);
+      function haltVideoUntilTurn(video) {
+        if (!video) return;
+        setVideoPreload(video, 'none');
+        try {
+          video.pause();
+        } catch (e) {}
+      }
 
-      /** 1) Перше відео — потім ховаємо «Завантаження…» і можна відкрити конверт */
+      haltVideoUntilTurn(v2);
+      haltVideoUntilTurn(heroV);
+
       window.__introEnvelopeVideoReady = (async () => {
         await Promise.all([posterReady, preloadWebFonts()]);
+        startVideoLoad(v1);
         await ensureVideoBuffered(v1, { autoLoad: false });
         markEnvelopeVideoReady();
-        startVideoLoad(v2);
       })();
 
       window.__introMediaReady = window.__introEnvelopeVideoReady;
 
-      /** 2) Одразу після першого — друге, потім hero (у фоні) */
       window.__introVideosFullReady = window.__introEnvelopeVideoReady
         .then(async () => {
+          startVideoLoad(v2);
           await ensureVideoBuffered(v2, { autoLoad: false });
           startVideoLoad(heroV);
           await ensureVideoBuffered(heroV, { autoLoad: false });
@@ -2007,7 +2004,6 @@
 
       window.__introEnvelopeVideoReady.catch(() => {
         markEnvelopeVideoReady();
-        startVideoLoad(v2);
       });
     })();
 
@@ -2631,27 +2627,27 @@
       }
     }
 
-    function triggerRevealStagger(section) {
-      section.querySelectorAll('[data-reveal-stagger]').forEach((child, i) => {
-        child.style.setProperty('--reveal-i', String(i));
-        requestAnimationFrame(() => {
-          child.classList.add('reveal-stagger-visible');
-        });
-      });
-    }
-
     function initFadeObserver() {
       const sectionObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
-            const el = entry.target;
-            el.classList.add('visible');
-            triggerRevealStagger(el);
-            sectionObserver.unobserve(el);
+            entry.target.classList.add('visible');
+            sectionObserver.unobserve(entry.target);
           });
         },
-        { threshold: 0.12, rootMargin: '0px 0px -5% 0px' }
+        { threshold: 0.32, rootMargin: '0px 0px -18% 0px' }
+      );
+
+      const scrollItemObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('reveal-scroll-visible');
+            scrollItemObserver.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.42, rootMargin: '0px 0px -10% 0px' }
       );
 
       const dividerObserver = new IntersectionObserver(
@@ -2662,10 +2658,13 @@
             dividerObserver.unobserve(entry.target);
           });
         },
-        { threshold: 0.15, rootMargin: '0px 0px -8% 0px' }
+        { threshold: 0.35, rootMargin: '0px 0px -12% 0px' }
       );
 
       document.querySelectorAll('.fade-up:not(.hero)').forEach((el) => sectionObserver.observe(el));
+      document.querySelectorAll('[data-reveal-stagger], .reveal-scroll-item').forEach((el) =>
+        scrollItemObserver.observe(el)
+      );
       document.querySelectorAll('.reveal-on-scroll').forEach((el) => dividerObserver.observe(el));
 
       const hero = document.querySelector('.hero.fade-up');
