@@ -83,6 +83,21 @@
       display: block;
       transition: opacity 0.35s ease;
     }
+    html:not(.intro-media-ready) #envelope-overlay::before {
+      content: 'Завантаження…';
+      position: absolute;
+      bottom: max(3.5rem, calc(env(safe-area-inset-bottom) + 2rem));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(0.85rem, 3.2vw, 1rem);
+      letter-spacing: 0.12em;
+      color: rgba(255, 252, 248, 0.88);
+      text-shadow: 0 1px 8px rgba(47, 38, 34, 0.35);
+      pointer-events: none;
+    }
     html:not(.intro-media-ready) #envelope-poster {
       animation: envelopePreparePulse 1.6s ease-in-out infinite;
     }
@@ -1105,7 +1120,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0.48rem;
+      gap: 0.1rem;
       padding: 0.7rem 1.25rem calc(1.1rem + env(safe-area-inset-bottom, 0px));
       margin-top: 0.15rem;
       background: #f0e4d8;
@@ -1121,7 +1136,8 @@
       letter-spacing: 0.13em;
       text-transform: lowercase;
       color: #6d5c50;
-      line-height: 1.25;
+      line-height: 1.1;
+      margin-bottom: 0.02rem;
     }
     .studio-credit__mark {
       display: inline-flex;
@@ -1142,9 +1158,9 @@
     }
     .studio-credit__logo {
       display: block;
-      width: min(760px, 92vw);
+      width: min(860px, 96vw);
       height: auto;
-      max-height: min(92px, 17.5vw);
+      max-height: min(104px, 19.5vw);
       object-fit: contain;
       object-position: center;
     }
@@ -1444,8 +1460,8 @@
           class="studio-credit__logo"
           src="assets/vowelle-studio.png"
           alt="Vowelle Studio"
-          width="760"
-          height="92"
+          width="860"
+          height="104"
           decoding="async"
           loading="lazy"
         />
@@ -1528,8 +1544,10 @@
       document.body.style.overflow = 'hidden';
     })();
 
-    const INTRO_ENVELOPE_TIMEOUT_MS = 9000;
-    const INTRO_VIDEO_TIMEOUT_MS = 18000;
+    const INTRO_BUFFER_MIN_RATIO = 0.92;
+    const INTRO_SHORT_VIDEO_MAX_SEC = 10;
+    const INTRO_LOAD_ATTEMPTS = 8;
+    const INTRO_LOAD_TIMEOUT_MS = 120000;
 
     function preloadImageAsset(src) {
       return new Promise((resolve) => {
@@ -1555,22 +1573,38 @@
       } catch (e) {}
     }
 
-  /**
-   * @param {HTMLVideoElement | null} video
-   * @param {{ minReadyState?: number, timeoutMs?: number, autoLoad?: boolean }} [opts]
-   */
-    function waitVideoReady(video, opts) {
-      const options = opts || {};
-      const minReadyState = options.minReadyState ?? 3;
-      const timeoutMs = options.timeoutMs ?? INTRO_VIDEO_TIMEOUT_MS;
-      const autoLoad = options.autoLoad !== false;
+    function getVideoBufferedEnd(video) {
+      try {
+        if (!video || !video.buffered || video.buffered.length === 0) return 0;
+        return video.buffered.end(video.buffered.length - 1);
+      } catch (e) {
+        return 0;
+      }
+    }
 
+    function isVideoFullyBuffered(video) {
+      if (!video) return true;
+      if (video.readyState >= 4) return true;
+
+      const duration = video.duration;
+      if (!Number.isFinite(duration) || duration <= 0) {
+        return false;
+      }
+
+      const bufferedEnd = getVideoBufferedEnd(video);
+      if (duration <= INTRO_SHORT_VIDEO_MAX_SEC) {
+        return bufferedEnd >= Math.max(0, duration - 0.2);
+      }
+      return bufferedEnd >= duration * INTRO_BUFFER_MIN_RATIO;
+    }
+
+    function waitForCanPlayThrough(video, timeoutMs) {
       return new Promise((resolve) => {
         if (!video) {
           resolve();
           return;
         }
-        if (video.readyState >= minReadyState) {
+        if (video.readyState >= 4 || isVideoFullyBuffered(video)) {
           resolve();
           return;
         }
@@ -1579,34 +1613,99 @@
           if (settled) return;
           settled = true;
           video.removeEventListener('canplaythrough', finish);
-          video.removeEventListener('canplay', finish);
-          video.removeEventListener('loadeddata', finish);
+          video.removeEventListener('progress', finish);
           video.removeEventListener('error', finish);
           resolve();
         };
         video.addEventListener('canplaythrough', finish, { once: true });
-        video.addEventListener('canplay', finish, { once: true });
-        video.addEventListener('loadeddata', finish, { once: true });
+        video.addEventListener('progress', finish);
         video.addEventListener('error', finish, { once: true });
-        if (autoLoad) startVideoLoad(video);
         setTimeout(finish, timeoutMs);
+        finish();
       });
     }
 
-    async function loadRemainingIntroVideos(v2, heroV) {
+    async function ensureVideoBuffered(video, opts) {
+      const options = opts || {};
+      const attempts = options.attempts ?? INTRO_LOAD_ATTEMPTS;
+      const timeoutMs = options.timeoutMs ?? INTRO_LOAD_TIMEOUT_MS;
+      const autoLoad = options.autoLoad !== false;
+
+      if (!video) return;
+
+      for (let attempt = 0; attempt < attempts; attempt++) {
+        if (isVideoFullyBuffered(video)) return;
+
+        if (autoLoad || attempt > 0) startVideoLoad(video);
+
+        try {
+          await new Promise((resolve, reject) => {
+            let settled = false;
+            const tryResolve = () => {
+              if (settled) return;
+              if (isVideoFullyBuffered(video)) {
+                settled = true;
+                cleanup();
+                resolve();
+              }
+            };
+            const onFail = () => {
+              if (settled) return;
+              settled = true;
+              cleanup();
+              reject(new Error('video-buffer-timeout'));
+            };
+            const cleanup = () => {
+              video.removeEventListener('canplaythrough', tryResolve);
+              video.removeEventListener('progress', tryResolve);
+              video.removeEventListener('loadedmetadata', tryResolve);
+              video.removeEventListener('durationchange', tryResolve);
+              video.removeEventListener('error', onFail);
+              clearTimeout(timer);
+            };
+            video.addEventListener('canplaythrough', tryResolve);
+            video.addEventListener('progress', tryResolve);
+            video.addEventListener('loadedmetadata', tryResolve, { once: true });
+            video.addEventListener('durationchange', tryResolve);
+            video.addEventListener('error', onFail, { once: true });
+            const timer = setTimeout(onFail, timeoutMs);
+            tryResolve();
+          });
+        } catch (e) {
+          if (attempt < attempts - 1) {
+            await new Promise((r) => setTimeout(r, 700 * (attempt + 1)));
+          }
+        }
+      }
+
+      if (!isVideoFullyBuffered(video)) {
+        await waitForCanPlayThrough(video, timeoutMs);
+      }
+    }
+
+    async function loadAllIntroVideosStrict(v1, v2, heroV) {
+      setVideoPreload(v2, 'none');
+      setVideoPreload(heroV, 'none');
+      startVideoLoad(v1);
+
+      await ensureVideoBuffered(v1, { autoLoad: false });
+
       startVideoLoad(v2);
-      await waitVideoReady(v2, {
-        minReadyState: 3,
-        timeoutMs: INTRO_VIDEO_TIMEOUT_MS,
-        autoLoad: false,
-      });
+      await ensureVideoBuffered(v2, { autoLoad: false });
 
       startVideoLoad(heroV);
-      await waitVideoReady(heroV, {
-        minReadyState: 3,
-        timeoutMs: INTRO_VIDEO_TIMEOUT_MS,
-        autoLoad: false,
-      });
+      await ensureVideoBuffered(heroV, { autoLoad: false });
+    }
+
+    async function playVideoSafely(video) {
+      if (!video) return;
+      await ensureVideoBuffered(video, { autoLoad: true, attempts: 4 });
+      try {
+        return await video.play();
+      } catch (e) {
+        await ensureVideoBuffered(video, { autoLoad: true, attempts: 3 });
+        return video.play();
+      }
     }
 
     function preloadWebFonts() {
@@ -1660,45 +1759,22 @@
         document.documentElement.classList.add('intro-media-ready');
       }
 
-      /** Конверт можна відкривати, щойно готові постер + перше відео */
-      const envelopeReady = Promise.race([
-        Promise.all([
-          posterReady,
-          waitVideoReady(v1, {
-            minReadyState: 3,
-            timeoutMs: INTRO_ENVELOPE_TIMEOUT_MS,
-          }),
-          preloadWebFonts(),
-        ]),
-        new Promise((resolve) => setTimeout(resolve, INTRO_ENVELOPE_TIMEOUT_MS)),
-      ]).then(markEnvelopeReady);
-
-      window.__introMediaReady = envelopeReady;
-      envelopeReady.catch(markEnvelopeReady);
-
-      /** Друге відео та hero — у фоні, по черзі, після першого */
-      window.__introVideosFullReady = envelopeReady
-        .then(() => loadRemainingIntroVideos(v2, heroV))
-        .then(() => {
-          document.documentElement.classList.add('intro-videos-full-ready');
-        })
-        .catch(() => {
-          document.documentElement.classList.add('intro-videos-full-ready');
-        });
-
-      envelopeReady.then(() => {
+      /** Усі інтро-відео по черзі + повний буфер перед анімацією */
+      window.__introVideosFullReady = (async () => {
+        await Promise.all([posterReady, preloadWebFonts()]);
+        await loadAllIntroVideosStrict(v1, v2, heroV);
+        markEnvelopeReady();
+        document.documentElement.classList.add('intro-videos-full-ready');
         deferredImages.forEach((src) => {
           void preloadImageAsset(src);
         });
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(() => {
-            const link = document.createElement('link');
-            link.rel = 'prefetch';
-            link.as = 'video';
-            link.href = 'Video.mp4';
-            document.head.appendChild(link);
-          });
-        }
+      })();
+
+      window.__introMediaReady = window.__introVideosFullReady;
+
+      window.__introVideosFullReady.catch(() => {
+        markEnvelopeReady();
+        document.documentElement.classList.add('intro-videos-full-ready');
       });
     })();
 
@@ -1864,7 +1940,8 @@
       const overlay = document.getElementById('envelope-overlay');
       if (overlay) overlay.classList.add('is-preparing');
       try {
-        if (window.__introMediaReady) await window.__introMediaReady;
+        if (window.__introVideosFullReady) await window.__introVideosFullReady;
+        else if (window.__introMediaReady) await window.__introMediaReady;
       } catch (e) {}
       if (overlay) overlay.classList.remove('is-preparing');
       const videoOverlay = document.getElementById('video-overlay');
@@ -2158,14 +2235,6 @@
       v2.style.opacity = '0';
       v2.style.zIndex = '1';
       v2.pause();
-      if (v2.readyState < 2) {
-        try {
-          v2.load();
-        } catch (e) {}
-      }
-      try {
-        if (heroBgVideo && heroBgVideo.readyState < 2) heroBgVideo.load();
-      } catch (e) {}
 
       function readCssMs(name, fallback) {
         const n = parseFloat(
@@ -2180,44 +2249,30 @@
       const SWAP_START_V2_AT_MS = V1_PLAY_DURATION_MS + SWAP_WHITE_BRIGHTEN_MS;
 
       setTimeout(() => {
-        if (v2.readyState >= 2) {
-          try {
-            v2.currentTime = 0;
-            const prime = v2.play();
-            if (prime !== undefined) {
-              prime
-                .then(() => {
-                  try {
-                    v2.pause();
-                  } catch (e) {}
-                })
-                .catch(() => {});
-            }
-          } catch (e) {}
-        }
+        if (!isVideoFullyBuffered(v2)) return;
+        try {
+          v2.currentTime = 0;
+          void playVideoSafely(v2)
+            .then(() => {
+              try {
+                v2.pause();
+              } catch (e) {}
+            })
+            .catch(() => {});
+        } catch (e) {}
       }, Math.max(0, SWAP_START_V2_AT_MS - 520));
 
-      function primeIntroVideo() {
-        if (v2.readyState >= 2) return;
-        v2.addEventListener(
-          'canplay',
-          () => {
-            try {
-              v2.currentTime = 0;
-            } catch (e) {}
-          },
-          { once: true }
-        );
-      }
-      primeIntroVideo();
-
-      v1.currentTime = 0;
-      v1.play().then(() => {
-        overlay.style.display = 'none';
-      }).catch(() => {
-        overlay.style.display = 'none';
-        showInvitation();
-      });
+      try {
+        v1.currentTime = 0;
+      } catch (e) {}
+      void playVideoSafely(v1)
+        .then(() => {
+          overlay.style.display = 'none';
+        })
+        .catch(() => {
+          overlay.style.display = 'none';
+          showInvitation();
+        });
 
       /* v1 показує 1.3s → 0.5s плавно до білого → друге відео (події далі як раніше по v2.play/ended). */
       function startV2AfterWhiteFade() {
@@ -2269,42 +2324,28 @@
         let introPlayAttempts = 0;
 
         function beginPlayAndReveal() {
-          function tryPlayIntro() {
+          async function tryPlayIntro() {
             introPlayAttempts += 1;
             try {
               v2.currentTime = 0;
             } catch (e) {}
-            const p = v2.play();
 
             function onPlaying() {
               scheduleIntroEndReveal();
               afterV2FramesPaint(hideV1AndFadeFlashOut);
             }
 
-            if (p !== undefined) {
-              p.then(onPlaying).catch(() => {
-                if (introPlayAttempts < 5) setTimeout(tryPlayIntro, 260);
-              });
-            } else {
-              requestAnimationFrame(onPlaying);
+            try {
+              await playVideoSafely(v2);
+              onPlaying();
+            } catch (e) {
+              if (introPlayAttempts < 8) {
+                setTimeout(tryPlayIntro, 400 * introPlayAttempts);
+              }
             }
           }
 
-          if (v2.readyState >= 2) {
-            tryPlayIntro();
-          } else {
-            const onReady = () => {
-              v2.removeEventListener('canplay', onReady);
-              v2.removeEventListener('error', onErr);
-              tryPlayIntro();
-            };
-            const onErr = () => {
-              v2.removeEventListener('canplay', onReady);
-              v2.removeEventListener('error', onErr);
-            };
-            v2.addEventListener('canplay', onReady, { once: true });
-            v2.addEventListener('error', onErr, { once: true });
-          }
+          void tryPlayIntro();
         }
 
         /** Один підготовковий тік перед play(), щоб z-index та opacity записались перед композитом. */
