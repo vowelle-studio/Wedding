@@ -5,31 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Андрій & Анна — Весілля</title>
+  <title>Андрій &amp; Анна — Весілля</title>
   <meta name="description" content="Запрошуємо вас на весілля Андрія та Анни — 12 липня 2026. Відкрийте конверт на сайті." />
-  <!--
-    Превʼю в Telegram / Instagram / Viber (Open Graph):
-    Після публікації замініть YOUR-SITE-URL на повну HTTPS-адресу сайту без слеша в кінці.
-    Приклад: https://username.github.io/Wedding
-  -->
+  <!-- Превʼю в месенджерах: og:image відносний — працює на будь-якому HTTPS-хостингу -->
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Андрій & Анна" />
-  <meta property="og:title" content="Андрій & Анна — Весілля 12.07.2026" />
-  <meta property="og:description" content="Запрошуємо вас на наше весілля 💌 Відкрийте конверт на сайті — 12 липня 2026" />
+  <meta property="og:site_name" content="Андрій &amp; Анна" />
+  <meta property="og:title" content="Андрій &amp; Анна — Весілля 12.07.2026" />
+  <meta property="og:description" content="Запрошуємо вас на наше весілля. Відкрийте конверт на сайті — 12 липня 2026" />
   <meta property="og:locale" content="uk_UA" />
-  <meta property="og:url" content="YOUR-SITE-URL/" />
-  <meta property="og:image" content="YOUR-SITE-URL/assets/og-preview.jpg" />
-  <meta property="og:image:secure_url" content="YOUR-SITE-URL/assets/og-preview.jpg" />
+  <meta property="og:image" content="assets/og-preview.jpg?v=2" />
   <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Запрошення-конверт на весілля Андрія та Анни" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Андрій & Анна — Весілля 12.07.2026" />
+  <meta name="twitter:title" content="Андрій &amp; Анна — Весілля 12.07.2026" />
   <meta name="twitter:description" content="Запрошуємо вас на наше весілля — 12 липня 2026" />
-  <meta name="twitter:image" content="YOUR-SITE-URL/assets/og-preview.jpg" />
+  <meta name="twitter:image" content="assets/og-preview.jpg?v=2" />
   <meta name="twitter:image:alt" content="Запрошення-конверт на весілля" />
-  <link rel="canonical" href="YOUR-SITE-URL/" />
+  <link rel="image_src" href="assets/og-preview.jpg?v=2" />
+  <script>
+    (function () {
+      if (location.protocol === 'file:') return;
+      var pageUrl = location.href.split('#')[0].split('?')[0];
+      var imageUrl = new URL('assets/og-preview.jpg?v=2', pageUrl).href;
+      var tags = [
+        ['property', 'og:url', pageUrl],
+        ['property', 'og:image', imageUrl],
+        ['property', 'og:image:secure_url', imageUrl],
+        ['name', 'twitter:image', imageUrl],
+      ];
+      tags.forEach(function (t) {
+        var el = document.querySelector('meta[' + t[0] + '="' + t[1] + '"]');
+        if (el) el.setAttribute('content', t[2]);
+        else {
+          el = document.createElement('meta');
+          el.setAttribute(t[0], t[1]);
+          el.content = t[2];
+          document.head.appendChild(el);
+        }
+      });
+      var canonical = document.querySelector('link[rel="canonical"]');
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.rel = 'canonical';
+        document.head.appendChild(canonical);
+      }
+      canonical.href = pageUrl;
+    })();
+  </script>
   <link rel="icon" type="image/png" href="assets/icon.png" />
   <link rel="apple-touch-icon" href="assets/icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -57,7 +81,7 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html,
     body {
-      background: #f8f0e6;
+      background: var(--milky-bg);
     }
     html {
       scroll-behavior: smooth;
@@ -256,29 +280,38 @@
         rgba(255, 255, 255, 0.65),
         rgba(255, 255, 255, 0.2)
       );
+      --hero-bg-overlay-opacity: 0.84;
+      --hero-shimmer-opacity: 0.2;
+      --hero-video-opacity: 0.86;
+      --hero-intro-video-brightness: 0.92;
+      --milky-bg: #f8f0e6;
+      --milky-bg-mid: #faf5ee;
+      --milky-bg-soft: #f4e9de;
+      --milky-bg-deep: #efe4d6;
       --video-overlay-bg: #b5b191;
       --video-crossfade-duration: 0.95s;
       --video-crossfade-ease: cubic-bezier(0.42, 0, 0.18, 1);
-      --intro-brighten-duration: 3.6s;
-      --intro-brighten-ease: cubic-bezier(0.22, 0.92, 0.36, 1);
-      --intro-text-fade-duration: 5.2s;
-      --intro-text-fade-ease: cubic-bezier(0.14, 0.92, 0.22, 1);
-      --intro-arrow-fade-delay: 1.1s;
-      --intro-text-after-brighten-ratio: 0.32;
+      --intro-brighten-duration: 9s;
+      --intro-brighten-ease: cubic-bezier(0.06, 0.68, 0.14, 1);
+      --intro-text-fade-duration: 7s;
+      --intro-text-fade-ease: cubic-bezier(0.12, 0.9, 0.2, 1);
+      --intro-arrow-fade-delay: 1.45s;
+      --intro-text-after-brighten-ratio: 0.26;
       --intro-handoff-text-ratio: 0.92;
-      --intro-handoff-earlier: 3s;
+      --intro-handoff-earlier: 5s;
+      --intro-reveal-before-end: 0.5s;
       --v1-play-ms: 1500;
       --swap-white-to-white-ms: 500;
       --swap-white-reveal-ms: 350;
     }
 
     @keyframes introBrightenBg {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      0% { opacity: 0; }
+      100% { opacity: var(--hero-bg-overlay-opacity); }
     }
     @keyframes introBrightenShimmer {
-      0%, 28% { opacity: 0; }
-      100% { opacity: 0.28; }
+      0% { opacity: 0; }
+      100% { opacity: var(--hero-shimmer-opacity); }
     }
 
     /* ── Video overlay ── */
@@ -336,7 +369,7 @@
       transition: none;
     }
 
-    /* Висвітлення на Hero-шарах (invitation вище overlay — video-brighten там не видно) */
+    /* Висвітлення на тих самих шарах, що й Hero (bg + shimmer), без intro-veil */
     body.invite-reveal:not(.is-brightening):not(.hero-live) .hero-bg,
     body.invite-reveal:not(.is-brightening):not(.hero-live) .hero-shimmer {
       opacity: 0 !important;
@@ -345,33 +378,64 @@
     }
     body.invite-reveal.is-brightening:not(.hero-live) .hero-bg {
       visibility: visible !important;
+      opacity: 0;
       animation: introBrightenBg var(--intro-brighten-duration) var(--intro-brighten-ease) forwards;
+      animation-fill-mode: forwards;
     }
     body.invite-reveal.is-brightening:not(.hero-live) .hero-shimmer {
       visibility: visible !important;
+      opacity: 0;
       animation: introBrightenShimmer var(--intro-brighten-duration) var(--intro-brighten-ease) forwards;
+      animation-fill-mode: forwards;
       background-position: 50% 0;
     }
-    body.invite-reveal .hero-intro-veil {
+    body.invite-reveal.hero-live .hero-bg {
+      opacity: var(--hero-bg-overlay-opacity) !important;
+      visibility: visible !important;
+      animation: none !important;
+    }
+    body.invite-reveal.hero-live .hero-shimmer {
+      opacity: var(--hero-shimmer-opacity) !important;
+      visibility: visible !important;
+      animation: none !important;
+      background-position: 50% 0;
+    }
+    body.invite-reveal .hero-intro-veil,
+    body.invite-reveal.hero-live .hero-intro-veil {
       display: none !important;
     }
-    #video-overlay.is-brightening .video-brighten {
-      animation: introBrightenBg var(--intro-brighten-duration) var(--intro-brighten-ease) forwards;
+    /* Під invite-reveal висвітлення лише на Hero — без другого шару на overlay */
+    body.invite-reveal #video-overlay.is-brightening .video-brighten,
+    body.invite-reveal #video-overlay.is-brightening .video-brighten::after {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      animation: none !important;
     }
-    #video-overlay.is-brightening .video-brighten::after {
-      animation: introBrightenShimmer var(--intro-brighten-duration) var(--intro-brighten-ease) forwards;
-      background-position: 50% 0;
+    body.invite-reveal #video-overlay .video-layer--second {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transition: none !important;
+      filter: brightness(var(--hero-intro-video-brightness));
+    }
+    body.hero-live .hero-intro-veil {
+      display: none !important;
+      opacity: 0 !important;
+      animation: none !important;
     }
     body.hero-live .hero-bg {
-      opacity: 1 !important;
+      opacity: var(--hero-bg-overlay-opacity) !important;
       visibility: visible !important;
       animation: none !important;
     }
     body.hero-live .hero-shimmer {
-      opacity: 0.28 !important;
+      opacity: var(--hero-shimmer-opacity) !important;
       visibility: visible !important;
       animation: none !important;
       background-position: 50% 0;
+    }
+    body.hero-live .hero-bg-video.is-ready {
+      opacity: var(--hero-video-opacity) !important;
+      visibility: visible !important;
     }
     
     #video-overlay .video-layer {
@@ -401,10 +465,10 @@
       opacity: 1;
       background: linear-gradient(
         180deg,
-        #f8f0e6 0%,
-        #faf5ee 38%,
-        #f4e9de 72%,
-        #efe4d6 100%
+        var(--milky-bg) 0%,
+        var(--milky-bg-mid) 38%,
+        var(--milky-bg-soft) 72%,
+        var(--milky-bg-deep) 100%
       );
     }
     .invitation-inner {
@@ -421,7 +485,8 @@
       overflow: hidden;
     }
     /* z-index вище #video-overlay (9998), інакше текст Hero лишається під відео */
-    body.invite-reveal #invitation {
+    body.invite-reveal #invitation,
+    body.hero-live #invitation {
       position: relative;
       z-index: 10002;
       isolation: auto;
@@ -442,11 +507,13 @@
       padding: 1.5rem;
       overflow: hidden;
     }
-    body.invite-reveal .hero-bg-video:not(.is-ready) {
+    body.invite-reveal:not(.hero-live) .hero-bg-video {
       opacity: 0 !important;
+      visibility: hidden !important;
     }
-    body.invite-reveal .hero-bg-video.is-ready {
-      opacity: 1 !important;
+    body.invite-reveal.hero-live .hero-bg-video.is-ready {
+      opacity: var(--hero-video-opacity) !important;
+      visibility: visible !important;
     }
     .hero-intro-veil {
       z-index: 3;
@@ -459,12 +526,14 @@
       visibility: hidden;
       transition: none !important;
     }
-    body.invite-reveal .hero .scroll-arrow {
+    body.invite-reveal .hero .hero-bottom {
       z-index: 10003;
       opacity: 0 !important;
       visibility: hidden;
       transition: none !important;
-      transform: translate(-50%, 0);
+      animation: none !important;
+    }
+    body.invite-reveal .hero .hero-bottom .scroll-arrow {
       animation: none !important;
     }
     body.invite-reveal .hero .hero-content.is-text-fading-in {
@@ -472,14 +541,18 @@
       opacity: 1 !important;
       transition: opacity var(--intro-text-fade-duration) var(--intro-text-fade-ease) !important;
     }
-    body.invite-reveal .hero .scroll-arrow.is-text-fading-in,
-    body.invite-reveal .hero .scroll-arrow.scroll-arrow--live,
-    .hero .scroll-arrow.scroll-arrow--live {
+    body.invite-reveal .hero .hero-bottom.is-text-fading-in,
+    body.invite-reveal .hero .hero-bottom.hero-bottom--live,
+    .hero .hero-bottom.hero-bottom--live {
       visibility: visible;
       opacity: 1 !important;
+    }
+    body.invite-reveal .hero .hero-bottom.is-text-fading-in .scroll-arrow,
+    body.invite-reveal .hero .scroll-arrow.scroll-arrow--live,
+    .hero .scroll-arrow.scroll-arrow--live {
       animation: heroArrowBounce 2s infinite !important;
     }
-    body.invite-reveal .hero .scroll-arrow.is-text-fading-in {
+    body.invite-reveal .hero .hero-bottom.is-text-fading-in {
       transition: opacity var(--intro-text-fade-duration) var(--intro-text-fade-ease)
         var(--intro-arrow-fade-delay) !important;
     }
@@ -689,8 +762,8 @@
       50% { transform: translateY(-10px); }
     }
     @keyframes heroArrowBounce {
-      0%, 100% { transform: translate(-50%, 0); }
-      50% { transform: translate(-50%, -8px); }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -803,20 +876,20 @@
       opacity: 0;
     }
     #invitation.visible .hero-bg-video.is-ready {
-      opacity: 1;
+      opacity: var(--hero-video-opacity);
     }
     .hero-bg {
       position: absolute;
       inset: 0;
       z-index: 1;
       background: var(--hero-bg-gradient);
-      opacity: 1;
+      opacity: var(--hero-bg-overlay-opacity);
     }
     .hero-shimmer {
       position: absolute;
       inset: 0;
       z-index: 2;
-      opacity: 0.28;
+      opacity: var(--hero-shimmer-opacity);
     }
     .hero-content {
       position: relative;
@@ -837,35 +910,61 @@
       margin-bottom: 1rem;
       text-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
-    .hero .subtitle {
-      text-transform: uppercase;
-      letter-spacing: 0.44em;
-      font-size: clamp(0.75rem, 3vw, 1.2rem);
-      font-weight: 600;
-      color: #2c1610;
-      margin-bottom: 2rem;
-      text-shadow: 0 1px 2px rgba(255, 248, 240, 0.45);
+    .hero-invite-copy {
+      max-width: min(92vw, 26rem);
+      margin: 1.35rem auto 0;
+      padding: 0 0.25rem;
     }
-    .hero .quote {
-      font-size: clamp(1rem, 4vw, 1.5rem);
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      line-height: 1.6;
-      max-width: 500px;
-      margin: 0 auto;
+    .hero-invite-heading {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(1.75rem, 6.8vw, 2.65rem);
+      font-weight: 400;
+      line-height: 1.15;
+      color: #2f2622;
+      margin: 0 0 1.1rem;
+      text-shadow: 0 1px 3px rgba(255, 248, 240, 0.45);
+    }
+    .hero-invite-message {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.05rem, 4.1vw, 1.35rem);
+      font-weight: 500;
+      line-height: 1.65;
+      letter-spacing: 0.02em;
       color: #3a2218;
+      margin: 0;
       text-shadow: 0 1px 2px rgba(255, 248, 240, 0.4);
     }
-    .hero .scroll-arrow {
+    .hero-bottom {
       position: absolute;
-      bottom: 2rem;
       left: 50%;
+      bottom: clamp(1rem, 4vw, 1.75rem);
       z-index: 20;
+      width: min(92vw, 22rem);
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.45rem;
+      text-align: center;
+    }
+    .hero .hero-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.92rem, 3.4vw, 1.08rem);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #4a3428;
+      margin: 0;
+      padding: 0 0.35rem;
+      opacity: 0.92;
+      text-shadow: 0 1px 2px rgba(255, 248, 240, 0.35);
+    }
+    .hero .scroll-arrow {
+      position: static;
       font-size: 1.8rem;
       line-height: 1;
       font-weight: 400;
       color: #6d4c35;
-      transform: translate(-50%, 0);
       animation: heroArrowBounce 2s infinite;
       text-shadow: 0 1px 4px rgba(255, 252, 247, 0.75);
     }
@@ -1152,20 +1251,7 @@
       );
     }
     .countdown-section::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 100%;
-      height: min(24vw, 160px);
-      pointer-events: none;
-      z-index: 0;
-      background: linear-gradient(
-        180deg,
-        #f2e6da 0%,
-        rgba(241, 228, 212, 0.98) 40%,
-        rgba(243, 232, 218, 1) 100%
-      );
+      display: none;
     }
     .countdown-card[data-reveal-stagger].reveal-scroll-visible {
       animation: revealCountdownPop 0.85s cubic-bezier(0.34, 1.35, 0.48, 1) forwards;
@@ -1301,6 +1387,28 @@
       outline-offset: 3px;
     }
 
+    /* Низ сторінки — суцільний молочний, без градієнтів */
+    .site-closing-milky {
+      position: relative;
+      z-index: 1;
+      background: var(--milky-bg-mid);
+    }
+    .site-closing-milky .page-divider,
+    .site-closing-milky .page-divider--countdown-bridge {
+      background: var(--milky-bg-mid);
+    }
+    .site-closing-milky .countdown-section {
+      background: var(--milky-bg-mid);
+    }
+    .site-closing-milky .countdown-section::before {
+      display: none;
+    }
+    .site-closing-milky .pare-block,
+    .site-closing-milky .footer,
+    .site-closing-milky .studio-credit {
+      background: transparent;
+    }
+
     /* ── Footer ── */
     .footer {
       position: relative;
@@ -1316,7 +1424,6 @@
       line-height: 1.25;
       color: #2f2622;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-      background: #f0e4d8;
     }
     .footer .couple-names {
       font-size: clamp(1.85rem, 7vw, 2.75rem);
@@ -1332,12 +1439,11 @@
       justify-content: center;
       gap: 0;
       padding: 1.65rem 1.25rem calc(1.1rem + env(safe-area-inset-bottom, 0px));
-      margin-top: 1.1rem;
+      margin-top: 0;
       margin-left: auto;
       margin-right: auto;
       width: 100%;
       max-width: 100%;
-      background: #f0e4d8;
       text-align: center;
     }
     .studio-credit__line {
@@ -1392,14 +1498,13 @@
       margin: 0 auto;
       padding: 1rem 1.35rem 1.5rem;
       box-sizing: border-box;
-      background: linear-gradient(180deg, rgba(252, 246, 238, 0.35) 0%, rgba(248, 239, 228, 0.55) 100%);
       border-radius: 0.5rem;
     }
     .pare-frame {
       position: relative;
       border-radius: 1rem;
       padding: 0;
-      background: rgba(245, 233, 218, 0.42);
+      background: transparent;
       box-shadow: none;
     }
     .pare-photo {
@@ -1505,10 +1610,17 @@
       <div class="hero-shimmer shimmer"></div>
       <div class="hero-content">
         <h1>Андрій & Анна</h1>
-        <p class="subtitle">Запрошуємо вас на наше весілля</p>
-        <p class="quote">Є події пам'ятні на все життя і є люди, з якими приємно бути поруч.</p>
+        <div class="hero-invite-copy">
+          <p class="hero-invite-heading" id="hero-invite-heading">Дорогі Гості!</p>
+          <p class="hero-invite-message" id="hero-invite-message">
+            Запрошуємо вас на наше весілля, яке відбудеться 12 липня 2026 року. Ми будемо безмежно щасливі, якщо ви розділите з нами чарівність і радість цього дня!
+          </p>
+        </div>
       </div>
-      <div class="scroll-arrow" aria-hidden="true">⌄</div>
+      <div class="hero-bottom">
+        <p class="hero-quote">Є події пам'ятні на все життя і є люди, з якими приємно бути поруч.</p>
+        <div class="scroll-arrow" aria-hidden="true">⌄</div>
+      </div>
     </section>
 
     <div class="page-divider reveal-on-scroll" aria-hidden="true"><img src="divider/divider_12.png" alt="" /></div>
@@ -1617,6 +1729,7 @@
       </div>
     </section>
 
+    <div class="site-closing-milky">
     <div class="page-divider page-divider--countdown-bridge reveal-on-scroll" aria-hidden="true"><img src="divider/divider_12.png" alt="" /></div>
 
     <!-- Countdown -->
@@ -1689,10 +1802,85 @@
       </a>
     </aside>
 
+    </div><!-- .site-closing-milky -->
     </div>
   </div>
 
   <script>
+    /** Індивідуальні запрошення: ?invite=slug або ?invite=1 … ?invite=9 */
+    const GUEST_INVITATIONS = [
+      { id: '1', slug: 'oleksandr-karyna', names: 'Олександр та Каріна', kind: 'pair' },
+      { id: '2', slug: 'iryna-yelyzaveta', names: 'Ірина та Єлизавета', kind: 'pair' },
+      { id: '3', slug: 'kateryna-vitya', names: 'Катерина та Віктор', kind: 'pair' },
+      { id: '4', slug: 'valera-anna', names: 'Валерій та Анна', kind: 'pair' },
+      { id: '5', slug: 'oleksandr-viktoria', names: 'Олександр та Вікторія', kind: 'pair' },
+      { id: '6', slug: 'iryna-igor', names: 'Ірина та Ігор', kind: 'pair' },
+      {
+        id: '7',
+        slug: 'oksana-family',
+        names: 'Оксана, Анатолій, Юлія, Ольга, Артем та Емілія',
+        kind: 'group',
+      },
+      { id: '8', slug: 'tetyana', names: 'Тетяна', kind: 'single' },
+      { id: '9', slug: 'serhiy-anastasia', names: 'Сергій та Анастасія', kind: 'pair' },
+    ];
+
+    function getInviteKeyFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      let raw = params.get('invite') || params.get('guest') || '';
+      if (!raw && window.location.hash) {
+        const hashQuery = window.location.hash.replace(/^#\??/, '');
+        if (hashQuery.includes('=')) {
+          raw = new URLSearchParams(hashQuery).get('invite') ||
+            new URLSearchParams(hashQuery).get('guest') ||
+            '';
+        } else if (/^[\w-]+$/.test(hashQuery)) {
+          raw = hashQuery;
+        }
+      }
+      return String(raw).trim().toLowerCase();
+    }
+
+    function resolveGuestInvitation() {
+      const raw = getInviteKeyFromUrl();
+      if (!raw) return null;
+      return (
+        GUEST_INVITATIONS.find((g) => g.slug === raw) ||
+        GUEST_INVITATIONS.find((g) => g.id === raw) ||
+        null
+      );
+    }
+
+    const HERO_INVITE_MESSAGE =
+      'Запрошуємо вас на наше весілля, яке відбудеться 12 липня 2026 року. Ми будемо безмежно щасливі, якщо ви розділите з нами чарівність і радість цього дня!';
+
+    function buildGuestHeading(invite) {
+      if (!invite) return 'Дорогі Гості!';
+      if (invite.kind === 'single') return `Дорога ${invite.names}!`;
+      return `Дорогі ${invite.names}!`;
+    }
+
+    function paintHeroInviteText() {
+      const headingEl = document.getElementById('hero-invite-heading');
+      const messageEl = document.getElementById('hero-invite-message');
+      const invite = window.__activeGuestInvite || resolveGuestInvitation();
+
+      if (headingEl) {
+        headingEl.textContent = buildGuestHeading(invite);
+      }
+      if (messageEl) {
+        messageEl.textContent = HERO_INVITE_MESSAGE;
+      }
+    }
+
+    function initPersonalInvitation() {
+      window.__activeGuestInvite = resolveGuestInvitation();
+      paintHeroInviteText();
+    }
+
+    initPersonalInvitation();
+    document.addEventListener('DOMContentLoaded', initPersonalInvitation);
+
     (function initScrollTop() {
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
@@ -1720,9 +1908,13 @@
     function unlockPageScroll() {
       document.documentElement.classList.remove('intro-scroll-lock');
       document.body.classList.remove('intro-scroll-lock');
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
+      document.documentElement.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('height');
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('position');
+      document.body.style.removeProperty('width');
+      document.body.style.removeProperty('top');
+      document.body.style.removeProperty('left');
     }
 
     /* Desktop hint */
@@ -2182,12 +2374,12 @@
 
       let safetyTimer = null;
       let introRevealTimer = null;
+      let introEarlyRevealTimer = null;
       let introTextTimer = null;
       let introHandoffTimer = null;
       let sequenceDone = false;
       let heroSeekPromise = null;
       let introLastFrameTime = null;
-
       function getIntroDuration() {
         const d2 = getVideoDuration(v2);
         const dHero = getVideoDuration(heroBgVideo);
@@ -2225,41 +2417,90 @@
         const introDur = getIntroDuration();
         const endThreshold =
           Number.isFinite(introDur) && introDur > 0 ? introDur - 0.12 : 0;
+        const endT = getVideoLastFrameTime(v2, introDur);
 
         try {
           v2.pause();
         } catch (e) {}
 
-        const v2AlreadyAtEnd =
-          Number.isFinite(v2.currentTime) &&
-          v2.currentTime >= endThreshold &&
-          v2.currentTime > 0;
+        const v2Time = Number.isFinite(v2.currentTime) ? v2.currentTime : 0;
+        const v2AlreadyAtEnd = v2Time >= endThreshold && v2Time > 0;
 
-        const lockIntroVideo = v2AlreadyAtEnd
-          ? Promise.resolve(v2.currentTime)
-          : seekVideoToLastFrame(v2, { durationHint: introDur });
+        introLastFrameTime = v2AlreadyAtEnd ? v2Time : endT;
 
-        heroSeekPromise = lockIntroVideo
-          .then((t) => {
-            introLastFrameTime =
-              Number.isFinite(t) && t > 0 ? t : getVideoLastFrameTime(v2, introDur);
-            return seekVideoToLastFrame(heroBgVideo, {
-              durationHint: introDur,
-              syncTime: introLastFrameTime,
-            });
-          })
-          .then(() => {
-            if (heroBgVideo) heroBgVideo.classList.add('is-ready');
-          });
+        if (!v2AlreadyAtEnd && Math.abs(v2Time - introLastFrameTime) > 0.05) {
+          try {
+            v2.currentTime = introLastFrameTime;
+          } catch (e) {}
+        }
+
+        heroSeekPromise = Promise.resolve().then(() => {
+          if (!heroBgVideo) return introLastFrameTime;
+          try {
+            heroBgVideo.pause();
+          } catch (e) {}
+          const heroNear =
+            Number.isFinite(heroBgVideo.currentTime) &&
+            Math.abs(heroBgVideo.currentTime - introLastFrameTime) < 0.04;
+          if (heroNear) return introLastFrameTime;
+          return seekVideoToLastFrame(heroBgVideo, {
+            durationHint: introDur,
+            syncTime: introLastFrameTime,
+          }).then(() => introLastFrameTime);
+        });
 
         return heroSeekPromise;
       }
 
       function clearIntroTimers() {
         if (introRevealTimer) clearTimeout(introRevealTimer);
+        if (introEarlyRevealTimer) clearTimeout(introEarlyRevealTimer);
         if (introTextTimer) clearTimeout(introTextTimer);
         if (introHandoffTimer) clearTimeout(introHandoffTimer);
-        introRevealTimer = introTextTimer = introHandoffTimer = null;
+        introRevealTimer = introEarlyRevealTimer = introTextTimer = introHandoffTimer = null;
+        try {
+          v2.removeEventListener('timeupdate', onV2EarlyRevealTick);
+        } catch (e) {}
+      }
+
+      function readIntroRevealBeforeEndSec() {
+        const root = getComputedStyle(document.documentElement);
+        const sec = parseFloat(root.getPropertyValue('--intro-reveal-before-end'));
+        if (Number.isFinite(sec) && sec > 0) return sec;
+        return 0.5;
+      }
+
+      function getIntroRevealAtTime() {
+        const dur = getIntroDuration();
+        const d =
+          Number.isFinite(dur) && dur > 0
+            ? dur
+            : Number.isFinite(v2.duration) && v2.duration > 0
+              ? v2.duration
+              : 0;
+        if (!(d > 0)) return null;
+        const beforeEnd = readIntroRevealBeforeEndSec();
+        return Math.max(0.35, Math.min(d - 0.15, d - beforeEnd));
+      }
+
+      let revealSequenceStarted = false;
+
+      function startRevealWhileV2Playing() {
+        if (revealSequenceStarted || sequenceDone) return;
+        revealSequenceStarted = true;
+        try {
+          v2.removeEventListener('timeupdate', onV2EarlyRevealTick);
+        } catch (e) {}
+        prepareInviteReveal();
+        beginInviteBrighten();
+      }
+
+      function onV2EarlyRevealTick() {
+        const revealAt = getIntroRevealAtTime();
+        if (revealAt == null) return;
+        if (v2.currentTime >= revealAt) {
+          startRevealWhileV2Playing();
+        }
       }
 
       function performInstantHandoff() {
@@ -2272,28 +2513,37 @@
           Number.isFinite(v2.duration) && v2.duration > 0 ? v2.duration : undefined;
 
         const run = () => {
-          lockPageScrollTop();
-
           try {
             v2.pause();
+            heroBgVideo?.pause();
           } catch (e) {}
 
+          if (heroBgVideo) heroBgVideo.classList.add('is-ready');
+
           requestAnimationFrame(() => {
-            document.body.classList.add('hero-live');
-            videoOverlay.classList.add('is-handoff-done');
-
             requestAnimationFrame(() => {
-              document.body.classList.remove('invite-reveal', 'invite-reveal--text', 'is-brightening');
-              videoOverlay.classList.remove('is-brightening');
-              resetIntroTextFade(document.querySelector('.hero .hero-content'));
-              commitArrowToHero(document.querySelector('.hero .scroll-arrow'));
+              /* Спочатку Hero (відео + шари) поверх overlay, потім зняття overlay — без бліку */
+              document.body.classList.add('hero-live');
+              void heroBgVideo?.offsetWidth;
+              void document.querySelector('.hero-bg')?.offsetWidth;
 
-              if (heroSection) {
-                heroSection.classList.add('hero-instant', 'visible');
-              }
+              requestAnimationFrame(() => {
+                videoOverlay.classList.add('is-handoff-done');
 
-              cleanupVideoOverlay();
-              unlockPageScroll();
+                requestAnimationFrame(() => {
+                  document.body.classList.remove('invite-reveal', 'invite-reveal--text', 'is-brightening');
+                  videoOverlay.classList.remove('is-brightening');
+                  commitHeroContentToLive(document.querySelector('.hero .hero-content'));
+                  commitHeroBottomToLive(document.querySelector('.hero .hero-bottom'));
+
+                  if (heroSection) {
+                    heroSection.classList.add('hero-instant', 'visible');
+                  }
+
+                  cleanupVideoOverlay();
+                  unlockPageScroll();
+                });
+              });
             });
           });
         };
@@ -2302,18 +2552,16 @@
           Number.isFinite(introLastFrameTime) && introLastFrameTime > 0
             ? introLastFrameTime
             : getVideoLastFrameTime(v2, introDur);
-        const afterHero =
-          heroSeekPromise ||
-          seekVideoToLastFrame(heroBgVideo, { durationHint: introDur, syncTime: lastT }).then(() => {
-            if (heroBgVideo) heroBgVideo.classList.add('is-ready');
-          });
-        Promise.resolve(afterHero).then(run).catch(run);
+        introLastFrameTime = lastT;
+
+        Promise.resolve(heroSeekPromise).then(run).catch(run);
       }
 
       function cleanupVideoOverlay() {
-        videoOverlay.classList.remove('active', 'is-handoff-done');
-        videoOverlay.style.visibility = '';
-        videoOverlay.style.pointerEvents = '';
+        videoOverlay.classList.remove('active', 'is-brightening');
+        videoOverlay.classList.add('is-handoff-done');
+        videoOverlay.style.visibility = 'hidden';
+        videoOverlay.style.pointerEvents = 'none';
 
         if (!window.__fadeObserverReady) {
           initFadeObserver();
@@ -2347,19 +2595,43 @@
 
       function resetIntroTextFade(el) {
         if (!el) return;
-        el.classList.remove('is-text-fading-in', 'scroll-arrow--live');
+        el.classList.remove('is-text-fading-in', 'scroll-arrow--live', 'hero-bottom--live');
         el.style.removeProperty('opacity');
         el.style.removeProperty('visibility');
         el.style.removeProperty('transition');
+        const arrow = el.querySelector?.('.scroll-arrow');
+        if (arrow) {
+          arrow.classList.remove('is-text-fading-in', 'scroll-arrow--live');
+          arrow.style.removeProperty('opacity');
+          arrow.style.removeProperty('visibility');
+          arrow.style.removeProperty('transition');
+        }
       }
 
-      function commitArrowToHero(arrow) {
-        if (!arrow) return;
-        arrow.classList.remove('is-text-fading-in');
-        arrow.classList.add('scroll-arrow--live');
-        arrow.style.removeProperty('opacity');
-        arrow.style.removeProperty('visibility');
-        arrow.style.removeProperty('transition');
+      function commitHeroBottomToLive(bottom) {
+        if (!bottom) return;
+        bottom.classList.remove('is-text-fading-in');
+        bottom.classList.add('hero-bottom--live');
+        bottom.style.removeProperty('opacity');
+        bottom.style.removeProperty('visibility');
+        bottom.style.removeProperty('transition');
+        const arrow = bottom.querySelector('.scroll-arrow');
+        if (arrow) {
+          arrow.classList.remove('is-text-fading-in');
+          arrow.classList.add('scroll-arrow--live');
+          arrow.style.removeProperty('opacity');
+          arrow.style.removeProperty('visibility');
+          arrow.style.removeProperty('transition');
+        }
+      }
+
+      function commitHeroContentToLive(content) {
+        if (!content) return;
+        content.classList.remove('is-text-fading-in');
+        content.style.removeProperty('opacity');
+        content.style.removeProperty('visibility');
+        content.style.removeProperty('transition');
+        paintHeroInviteText();
       }
 
       function fadeInIntroTextEl(el, delayMs) {
@@ -2390,13 +2662,14 @@
 
       function revealIntroText() {
         const content = document.querySelector('.hero .hero-content');
-        const arrow = document.querySelector('.hero .scroll-arrow');
+        const bottom = document.querySelector('.hero .hero-bottom');
+        paintHeroInviteText();
         document.body.classList.add('invite-reveal--text');
         fadeInIntroTextEl(content, 0);
         const arrowDelay = parseFloat(
           getComputedStyle(document.documentElement).getPropertyValue('--intro-arrow-fade-delay')
         );
-        fadeInIntroTextEl(arrow, (Number.isFinite(arrowDelay) ? arrowDelay : 0.9) * 1000);
+        fadeInIntroTextEl(bottom, (Number.isFinite(arrowDelay) ? arrowDelay : 0.9) * 1000);
       }
 
       let inviteRevealPrepared = false;
@@ -2410,7 +2683,7 @@
         lockPageScrollTop();
         document.body.classList.add('invite-reveal');
         resetIntroTextFade(document.querySelector('.hero .hero-content'));
-        resetIntroTextFade(document.querySelector('.hero .scroll-arrow'));
+        resetIntroTextFade(document.querySelector('.hero .hero-bottom'));
         showInvitation({ skipFadeObserver: true });
       }
 
@@ -2433,7 +2706,7 @@
 
       function scheduleIntroEndReveal() {
         clearIntroTimers();
-        if (introRevealTimer) clearTimeout(introRevealTimer);
+        revealSequenceStarted = false;
 
         let introEndHandled = false;
 
@@ -2441,13 +2714,26 @@
           if (introEndHandled) return;
           introEndHandled = true;
           if (introRevealTimer) clearTimeout(introRevealTimer);
-          if (sequenceDone) return;
+          if (introEarlyRevealTimer) clearTimeout(introEarlyRevealTimer);
+          try {
+            v2.removeEventListener('timeupdate', onV2EarlyRevealTick);
+          } catch (e) {}
 
           freezeIntroAtLastFrame().then(() => {
-            prepareInviteReveal();
-            beginInviteBrighten();
+            if (!revealSequenceStarted && !sequenceDone) {
+              startRevealWhileV2Playing();
+            }
           });
         };
+
+        v2.addEventListener('timeupdate', onV2EarlyRevealTick);
+
+        const revealAt = getIntroRevealAtTime();
+        if (revealAt != null && revealAt > 0) {
+          introEarlyRevealTimer = setTimeout(() => {
+            startRevealWhileV2Playing();
+          }, revealAt * 1000 + 120);
+        }
 
         v2.addEventListener('ended', onIntroEnded, { once: true });
         introRevealTimer = setTimeout(onIntroEnded, 180000);

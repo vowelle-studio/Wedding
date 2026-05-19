@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Посилання на запрошення — для розсилки</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,500&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background: #f0e4d8;
+      color: #3d342f;
+      padding: 2rem 1.25rem 3rem;
+      line-height: 1.5;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .lead {
+      text-align: center;
+      max-width: 36rem;
+      margin: 0 auto 2rem;
+      font-size: 1.1rem;
+      color: #6d5c50;
+    }
+    .lead code {
+      font-size: 0.95em;
+      background: rgba(255, 255, 255, 0.45);
+      padding: 0.1em 0.35em;
+      border-radius: 0.25rem;
+    }
+    .site-url {
+      display: block;
+      width: 100%;
+      max-width: 36rem;
+      margin: 0 auto 2rem;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid rgba(184, 149, 110, 0.5);
+      border-radius: 0.5rem;
+      font-family: inherit;
+      font-size: 1rem;
+      background: rgba(255, 252, 248, 0.85);
+    }
+    ul {
+      list-style: none;
+      max-width: 40rem;
+      margin: 0 auto;
+    }
+    li {
+      margin-bottom: 1.25rem;
+      padding: 1rem 1.1rem;
+      background: rgba(255, 252, 248, 0.72);
+      border-radius: 0.75rem;
+      border: 1px solid rgba(210, 186, 162, 0.45);
+    }
+    .guest-name {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: #2f2622;
+    }
+    .invite-link {
+      display: block;
+      word-break: break-all;
+      font-size: 0.92rem;
+      color: #6d5848;
+      margin-bottom: 0.65rem;
+    }
+    .copy-btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.45rem 0.85rem;
+      border: 1px solid #b8956e;
+      border-radius: 2rem;
+      background: linear-gradient(155deg, #e9d6bf, #cfae88);
+      color: #3d342f;
+      cursor: pointer;
+    }
+    .copy-btn:active { transform: scale(0.98); }
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 2.5rem;
+      color: #6d5c50;
+    }
+  </style>
+</head>
+<body>
+  <h1>Індивідуальні запрошення</h1>
+  <p class="lead">
+    Вкажіть нижче адресу опублікованого сайту (без слеша в кінці). Кожен гість отримує своє посилання з параметром
+    <code>?invite=</code>
+  </p>
+  <label class="lead" for="site-base">Адреса сайту</label>
+  <input id="site-base" class="site-url" type="url" placeholder="https://username.github.io/Wedding" autocomplete="off" />
+
+  <ul id="invite-list"></ul>
+
+  <a class="back" href="index.html">← На головну</a>
+
+  <script>
+    const GUESTS = [
+      { slug: 'oleksandr-karyna', label: 'Олександр та Каріна' },
+      { slug: 'iryna-yelyzaveta', label: 'Ірина та Єлизавета' },
+      { slug: 'kateryna-vitya', label: 'Катерина та Віктор' },
+      { slug: 'valera-anna', label: 'Валерій та Анна' },
+      { slug: 'oleksandr-viktoria', label: 'Олександр та Вікторія' },
+      { slug: 'iryna-igor', label: 'Ірина та Ігор' },
+      { slug: 'oksana-family', label: 'Оксана, Анатолій, Юлія, Ольга, Артем та Емілія' },
+      { slug: 'tetyana', label: 'Тетяна' },
+      { slug: 'serhiy-anastasia', label: 'Сергій та Анастасія' },
+    ];
+
+    const baseInput = document.getElementById('site-base');
+    const list = document.getElementById('invite-list');
+
+    function getBase() {
+      const v = baseInput.value.trim().replace(/\/$/, '');
+      if (v) return v;
+      const origin = window.location.origin;
+      const path = window.location.pathname.replace(/invites\.html$/i, 'index.html');
+      return origin + path.replace(/index\.html$/i, '').replace(/\/$/, '') || origin;
+    }
+
+    function buildUrl(slug) {
+      return `${getBase()}/index.html?invite=${slug}`;
+    }
+
+    function render() {
+      list.innerHTML = '';
+      GUESTS.forEach((g, i) => {
+        const url = buildUrl(g.slug);
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="guest-name">${i + 1}. ${g.label}</div>
+          <a class="invite-link" href="${url}" target="_blank" rel="noopener">${url}</a>
+          <button type="button" class="copy-btn" data-url="${url}">Скопіювати посилання</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    baseInput.addEventListener('input', render);
+    list.addEventListener('click', (e) => {
+      const btn = e.target.closest('.copy-btn');
+      if (!btn) return;
+      const url = btn.getAttribute('data-url');
+      navigator.clipboard.writeText(url).then(() => {
+        btn.textContent = 'Скопійовано';
+        setTimeout(() => { btn.textContent = 'Скопіювати посилання'; }, 1600);
+      });
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -11,17 +11,39 @@
 
 Або будь-який статичний хостинг: скопіюйте всю папку проєкту на сервер.
 
+## Індивідуальні запрошення
+
+Кожен гість відкриває **своє** посилання — у блоці **Hero** з’являється персональне «Дорогі …» / «Дорога …».
+
+| № | Гості | Параметр `?invite=` |
+|---|--------|---------------------|
+| 1 | Олександр та Каріна | `oleksandr-karyna` |
+| 2 | Ірина та Єлизавета | `iryna-yelyzaveta` |
+| 3 | Катерина та Віктор | `kateryna-vitya` |
+| 4 | Валерій та Анна | `valera-anna` |
+| 5 | Олександр та Вікторія | `oleksandr-viktoria` |
+| 6 | Ірина та Ігор | `iryna-igor` |
+| 7 | Оксана, Анатолій, Юлія, Ольга, Артем та Емілія | `oksana-family` |
+| 8 | Тетяна | `tetyana` |
+| 9 | Сергій та Анастасія | `serhiy-anastasia` |
+
+**Приклад:** `https://YOUR-SITE-URL/index.html?invite=oleksandr-karyna`  
+Також працює номер: `?invite=1` … `?invite=9`.
+
+Сторінка **`invites.html`** — список усіх посилань для копіювання (вкажіть адресу сайту у полі зверху). Не публікуйте її в загальний доступ, якщо не потрібно.
+
 ## Превʼю посилання (Telegram, Instagram, Viber)
 
-У `index.html` у `<head>` є теги **Open Graph** — саме вони показують картинку конверта при надсиланні посилання.
+У `index.html` у `<head>` налаштовано **Open Graph**: картинка `assets/og-preview.jpg` (конверт 1200×630). Шлях відносний — працює на GitHub Pages і будь-якому HTTPS без ручної заміни домену.
 
-1. Після публікації сайту замініть у `index.html` усі **`YOUR-SITE-URL`** на вашу реальну HTTPS-адресу (без слеша в кінці), наприклад:  
-   `https://username.github.io/Wedding`
-2. Картинка превʼю: `assets/og-preview.jpg` (обрізаний конверт 1200×630).
-3. Перевірка:
-   - [Telegram Instant View / preview](https://t.me/webpagebot) — надішліть боту посилання на сайт
-   - [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) — для Instagram теж використовує OG
-4. Якщо картинка не оновилась — месенджери кешують превʼю; скиньте кеш у Sharing Debugger або змініть URL (наприклад додайте `?v=2`).
+**Важливо:** надсилайте **опубліковане HTTPS-посилання** (не `file://` і не локальний файл). Приклад:  
+`https://username.github.io/Wedding/index.html?invite=oleksandr-karyna`
+
+Перевірка:
+- [@webpagebot](https://t.me/webpagebot) у Telegram — надішліть посилання на сайт
+- [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) — «Scrape Again», якщо превʼю застаріле
+
+Якщо картинка не оновилась — збільште `?v=` у `og-preview.jpg?v=2` у `<head>`.
 
 ## Обовʼязкові файли
 
