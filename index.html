@@ -478,8 +478,9 @@
         180deg,
         var(--milky-bg) 0%,
         var(--milky-bg-mid) 38%,
-        var(--milky-bg-soft) 72%,
-        var(--milky-bg-deep) 100%
+        var(--milky-bg-soft) 58%,
+        var(--milky-bg) 68%,
+        var(--milky-bg) 100%
       );
     }
     .invitation-inner {
@@ -851,12 +852,7 @@
     }
     .page-divider--countdown-bridge {
       padding: 2rem 1rem 0;
-      background: linear-gradient(
-        180deg,
-        rgba(245, 235, 222, 0) 0%,
-        rgba(243, 230, 216, 0.55) 48%,
-        rgba(241, 226, 210, 0.95) 100%
-      );
+      background: transparent;
     }
     .page-divider--countdown-bridge img {
       opacity: 0.82;
@@ -950,9 +946,9 @@
       font-weight: 500;
       line-height: 1.65;
       letter-spacing: 0.02em;
-      color: #3a2218;
+      color: #120c09;
       margin: 0;
-      text-shadow: 0 1px 2px rgba(255, 248, 240, 0.4);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
     }
     .hero-bottom {
       position: absolute;
@@ -1252,23 +1248,10 @@
       overflow: visible;
       border-radius: 0;
       box-shadow: none;
-      background: #f2e6da;
+      background: transparent;
     }
     .countdown-section::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 100%;
-      height: min(28vw, 200px);
-      pointer-events: none;
-      z-index: 0;
-      background: linear-gradient(
-        180deg,
-        rgba(242, 230, 216, 0) 0%,
-        rgba(240, 226, 210, 0.65) 55%,
-        #f2e6da 100%
-      );
+      display: none;
     }
     .countdown-section::after {
       display: none;
@@ -1407,22 +1390,15 @@
       outline-offset: 3px;
     }
 
-    /* Низ сторінки — суцільний молочний, без градієнтів */
+    /* Низ сторінки — той самий беж + літаючі кульки, без окремих градієнтів */
     .site-closing-milky {
       position: relative;
-      z-index: 1;
-      background: var(--milky-bg-mid);
+      z-index: auto;
+      background: transparent;
     }
     .site-closing-milky .page-divider,
-    .site-closing-milky .page-divider--countdown-bridge {
-      background: var(--milky-bg-mid);
-    }
-    .site-closing-milky .countdown-section {
-      background: var(--milky-bg-mid);
-    }
-    .site-closing-milky .countdown-section::before {
-      display: none;
-    }
+    .site-closing-milky .page-divider--countdown-bridge,
+    .site-closing-milky .countdown-section,
     .site-closing-milky .pare-block,
     .site-closing-milky .footer,
     .site-closing-milky .studio-credit {
