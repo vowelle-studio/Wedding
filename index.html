@@ -283,7 +283,7 @@
       --hero-bg-overlay-opacity: 0.84;
       --hero-shimmer-opacity: 0.2;
       --hero-video-opacity: 0.86;
-      --hero-intro-video-brightness: 0.92;
+      --hero-intro-video-brightness: 1;
       --milky-bg: #f8f0e6;
       --milky-bg-mid: #faf5ee;
       --milky-bg-soft: #f4e9de;
@@ -296,9 +296,9 @@
       --intro-text-fade-duration: 7s;
       --intro-text-fade-ease: cubic-bezier(0.12, 0.9, 0.2, 1);
       --intro-arrow-fade-delay: 1.45s;
-      --intro-text-after-brighten-ratio: 0.18;
+      --intro-text-after-brighten-ratio: 0.08;
       --intro-handoff-text-ratio: 0.92;
-      --intro-handoff-earlier: 5s;
+      --intro-handoff-earlier: 6s;
       --intro-reveal-before-end: 0.5s;
       --v1-play-ms: 1500;
       --swap-white-to-white-ms: 500;
@@ -307,11 +307,18 @@
 
     @keyframes introBrightenBg {
       0% { opacity: 0; }
+      22% { opacity: var(--hero-bg-overlay-opacity); }
       100% { opacity: var(--hero-bg-overlay-opacity); }
     }
     @keyframes introBrightenShimmer {
       0% { opacity: 0; }
+      22% { opacity: var(--hero-shimmer-opacity); }
       100% { opacity: var(--hero-shimmer-opacity); }
+    }
+    @keyframes introBrightenVideo {
+      0% { filter: brightness(0.9); }
+      22% { filter: brightness(var(--hero-intro-video-brightness)); }
+      100% { filter: brightness(var(--hero-intro-video-brightness)); }
     }
 
     /* ── Video overlay ── */
@@ -416,6 +423,10 @@
       visibility: visible !important;
       transition: none !important;
       filter: brightness(var(--hero-intro-video-brightness));
+    }
+    body.invite-reveal.is-brightening #video-overlay .video-layer--second {
+      animation: introBrightenVideo var(--intro-brighten-duration) var(--intro-brighten-ease) forwards;
+      animation-fill-mode: forwards;
     }
     body.hero-live .hero-intro-veil {
       display: none !important;
